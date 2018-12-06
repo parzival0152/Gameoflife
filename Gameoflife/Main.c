@@ -29,7 +29,7 @@ int main()
 	char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE];
 	int width, height;
 	long int generations;
-	//initGame(board, &width, &height, &generations);  
+	initGame(board, &width, &height, &generations);  
 	//playGame(board, width, height, generations);
 	system("pause");
 	return 0;
@@ -41,12 +41,12 @@ void getDimentions(int* width, int* height)
 	{
 		printf("Enter width (10-70):\n");
 		scanf("%d", width);
-	} while (*width>70 || *width < 10);
+	} while (*width > MAX_WIDTH_SIZE || *width < MIN_WIDTH_SIZE);
 	do
 	{
 		printf("Enter height (10-70):\n");
 		scanf("%d", height);
-	} while (*height > 70 || *height < 10);
+	} while (*height > MAX_HEIGHT_SIZE || *height < MIN_HEIGHT_SIZE);
 }
 
 long int getNumOfGenerations()
@@ -54,6 +54,7 @@ long int getNumOfGenerations()
 	long int generations;
 	do
 	{
+		printf("Enter number of generations(>0):\n");
 		scanf("%ld", &generations);
 	} while (generations<=0);
 	return generations;
@@ -68,7 +69,7 @@ void initBoard(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int* width, int* hei
 	{
 		for (j = 0; j < *width; j++)
 		{
-			board[i][j] = '-';
+			board[j][i] = '-';
 		}
 	}
 	initLivingCells(board, *width, *height);
@@ -82,7 +83,7 @@ void initLivingCells(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int
 	do
 	{
 		printf("Enter number of living cells (0-%d):\n", width*height);
-		scanf("%d",&amount);
+		scanf("%d", &amount);
 	} while (amount<0 || amount>width*height);
 	for (i = 0; i < amount; i++)
 	{
@@ -91,11 +92,11 @@ void initLivingCells(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int
 			valid = 0;
 			printf("Enter x y and color (R/G):\n");
 			scanf("%d %d %c", &x, &y, &c);
-			if (c == (PLAYER_COLOR+32) || c == PLAYER_COLOR)
+			if (c == (PLAYER_COLOR + 32) || c == PLAYER_COLOR)
 				valid = 1, c = 'R';
-			else if(c == (COMPUTER_COLOR+32) || c == COMPUTER_COLOR)
+			else if (c == (COMPUTER_COLOR + 32) || c == COMPUTER_COLOR)
 				valid = 1, c = 'G';
-		} while (x >= width || x < 0 || y >= height || y < 0||valid==0);
+		} while (x >= width || x < 0 || y >= height || y < 0 || valid == 0);
 		board[x][y] = c;
 	}
 
@@ -105,7 +106,7 @@ void initGame(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int height
 {
 	printf("Welcome to the game of life!\nSettings:\n");
 	initBoard(board, &width, &height);
-	*generations = getNumOfGenerations();
+	//*generations = getNumOfGenerations();
 }
 
 void printBoard(const char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int height)
@@ -115,7 +116,7 @@ void printBoard(const char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, in
 	{
 		for (j = 0; j < width; j++)
 		{
-			printf("%c", board[i][j]);
+			printf("%c", board[j][i]);
 		}
 		printf("\n");
 	}
