@@ -23,6 +23,7 @@ void getDimentions(int* width, int* height);
 void printBoard(const char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int height);
 long int getNumOfGenerations();
 int endstate(const char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int height);
+char processcell(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int height, int x, int y);
 
 int main()
 {
@@ -119,6 +120,39 @@ void printBoard(const char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, in
 			printf("%c", board[j][i]);
 		}
 		printf("\n");
+	}
+}
+
+char processcell(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int height, int x, int y)
+{
+	int nx, ny, player = 0, computer = 0,alive=0;
+	for (int i = -1; i <= 1; i++)
+	{
+		for (int j = -1; j <= 1; j++)
+		{
+			nx = (width + x + i) % width;
+			ny = (height + y + i) % height;
+			if (j == 0 && i == 0)
+				alive = (board[nx][ny] == PLAYER_COLOR || board[nx][ny] == COMPUTER_COLOR);
+			else
+			{
+				if (board[nx][ny] == PLAYER_COLOR)
+					player++;
+				else if (board[nx][ny] == COMPUTER_COLOR)
+					computer++;
+			}
+		}
+	}
+	if (alive && (player + computer == 3 || player + computer == 2))
+	{
+		return board[x][y];
+	}
+	else
+	{
+		if (player + computer == 3)
+			return player > computer ? PLAYER_COLOR : COMPUTER_COLOR;
+		else
+			return '-';
 	}
 }
 
