@@ -70,7 +70,7 @@ void initBoard(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int* width, int* hei
 	{
 		for (j = 0; j < *width; j++)
 		{
-			board[j][i] = '-';
+			board[i][j] = '-';
 		}
 	}
 	initLivingCells(board, *width, *height);
@@ -98,7 +98,7 @@ void initLivingCells(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int
 			else if (c == (COMPUTER_COLOR + 32) || c == COMPUTER_COLOR)
 				valid = 1, c = 'G';
 		} while (x >= width || x < 0 || y >= height || y < 0 || valid == 0);
-		board[x][y] = c;
+		board[y][x] = c;
 	}
 
 }
@@ -108,6 +108,7 @@ void initGame(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int height
 	printf("Welcome to the game of life!\nSettings:\n");
 	initBoard(board, &width, &height);
 	//*generations = getNumOfGenerations();
+
 }
 
 void printBoard(const char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int height)
@@ -117,7 +118,7 @@ void printBoard(const char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, in
 	{
 		for (j = 0; j < width; j++)
 		{
-			printf("%c", board[j][i]);
+			printf("%c", board[i][j]);
 		}
 		printf("\n");
 	}
@@ -130,22 +131,22 @@ char processcell(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int hei
 	{
 		for (int j = -1; j <= 1; j++)
 		{
-			nx = (width + x + i) % width;
-			ny = (height + y + i) % height;
+			nx = (width + x + i) % width;//new x
+			ny = (height + y + i) % height;//new y
 			if (j == 0 && i == 0)
-				alive = (board[nx][ny] == PLAYER_COLOR || board[nx][ny] == COMPUTER_COLOR);
+				alive = (board[ny][nx] == PLAYER_COLOR || board[ny][nx] == COMPUTER_COLOR);
 			else
 			{
-				if (board[nx][ny] == PLAYER_COLOR)
+				if (board[ny][nx] == PLAYER_COLOR)
 					player++;
-				else if (board[nx][ny] == COMPUTER_COLOR)
+				else if (board[ny][nx] == COMPUTER_COLOR)
 					computer++;
 			}
 		}
 	}
 	if (alive && (player + computer == 3 || player + computer == 2))
 	{
-		return board[x][y];
+		return board[y][x];
 	}
 	else
 	{
@@ -158,5 +159,16 @@ char processcell(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int hei
 
 int endstate(const char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int height)
 {///returns 0 for extinction, 1 for player win, 2 for computer win
-
+	int player = 0, computer = 0;
+	for (int i = 0; i < height; i++)
+	{
+		for (int j = 0; j < width; j++)
+		{
+			if (board[i][j] == PLAYER_COLOR)
+				player++;
+			else if (board[i][j] == COMPUTER_COLOR)
+				computer++;
+		}
+	}
+	return (player == 0 && computer == 0) ? 0 : (player > computer ? 1 : (player < computer ? 2 : 0));
 }
