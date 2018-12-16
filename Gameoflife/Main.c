@@ -9,12 +9,11 @@
 /*
 Ilay Tzuberi
 
-note to self: * on a int* will give the value of the pointer
-a=97 A=65
-z=122 Z=90
+'a'=97 'A'=65
+'z'=122 'Z'=90
 */
 
-void initGame(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int height, long int* generations);
+void initGame(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int* width, int* height, long int* generations);
 void initBoard(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int* width, int* height);
 void initLivingCells(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int height);
 void playGame(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int height, long int generations);
@@ -30,8 +29,8 @@ int main()
 	char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE];
 	int width, height;
 	long int generations;
-	initGame(board, &width, &height, &generations);  
-	//playGame(board, width, height, generations);
+	initGame(board, &width, &height, &generations);
+	playGame(board, width, height, generations);
 	system("pause");
 	return 0;
 }
@@ -103,12 +102,18 @@ void initLivingCells(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int
 
 }
 
-void initGame(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int height, long int* generations)
+void initGame(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int* width, int* height, long int* generations)
 {
 	printf("Welcome to the game of life!\nSettings:\n");
-	initBoard(board, &width, &height);
-	//*generations = getNumOfGenerations();
+	initBoard(board, width, height);
+	*generations = getNumOfGenerations();
+}
 
+void playGame(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int height, long int generations)
+{
+	printf("\nWelcome to the game of life!\nThis is the initial board:\n");
+	processBoard(board, width, height);
+	printBoard(board, width, height);
 }
 
 void printBoard(const char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int height)
@@ -118,7 +123,7 @@ void printBoard(const char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, in
 	{
 		for (j = 0; j < width; j++)
 		{
-			printf("%c", board[i][j]);
+			printf("%c", board[j][i]);
 		}
 		printf("\n");
 	}
@@ -126,13 +131,13 @@ void printBoard(const char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, in
 
 char processcell(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int height, int x, int y)
 {
-	int nx, ny, player = 0, computer = 0,alive=0;
+	int nx, ny, player = 0, computer = 0, alive = 0, sum;
 	for (int i = -1; i <= 1; i++)
 	{
 		for (int j = -1; j <= 1; j++)
 		{
 			nx = (width + x + i) % width;//new x
-			ny = (height + y + i) % height;//new y
+			ny = (height + y + j) % height;//new y
 			if (j == 0 && i == 0)
 				alive = (board[ny][nx] == PLAYER_COLOR || board[ny][nx] == COMPUTER_COLOR);
 			else
@@ -144,17 +149,32 @@ char processcell(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int hei
 			}
 		}
 	}
-	if (alive && (player + computer == 3 || player + computer == 2))
+	sum = player + computer;
+	if (alive && (sum == 3 || sum == 2))
 	{
 		return board[y][x];
 	}
 	else
 	{
-		if (player + computer == 3)
+		if (sum == 3)
 			return player > computer ? PLAYER_COLOR : COMPUTER_COLOR;
 		else
 			return '-';
 	}
+}
+
+void processBoard(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int height)
+{
+	int i, j;
+	char temp[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE];
+	for ( i = 0; i < height; i++)
+	{
+		for ( j = 0; j < width; j++)
+		{
+			temp[i][j] = processcell(board, width, height, j, i);
+		}
+	}
+	board = temp;
 }
 
 int endstate(const char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int height)
