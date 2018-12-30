@@ -335,9 +335,9 @@ void getCell(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int height,
 		printf("Enter x y and color (R/G):\n");
 		scanf("%d %d %c", &x, &y, &c);
 		if (c == PLAYER_COLOR_LOWERCASE || c == PLAYER_COLOR)
-			valid = 1, c = 'R';
+			valid = 1, c = PLAYER_COLOR;
 		else if (c == COMPUTER_COLOR_LOWERCASE || c == COMPUTER_COLOR)
-			valid = 1, c = 'G';
+			valid = 1, c = COMPUTER_COLOR;
 		inboard = !(x > width || x < 0 || y > height || y < 0);//checking if the location he chose is not out of bounds
 		if (inboard)
 			isalive = (board[y][x] != DEAD_COLOR);
