@@ -10,7 +10,6 @@
 #define COMPUTER_COLOR_LOWERCASE 'g'
 #define DEAD_COLOR '-'
 
-
 /*******************
 Ilay Tzuberi
 211873286
@@ -139,8 +138,8 @@ The function operation: initialize the game using other functions.
 void initGame(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int* width, int* height, long int* generations)
 {
 	printf("Welcome to the game of life!\nSettings:\n");
-	initBoard(board, width, height);
-	*generations = getNumOfGenerations();
+	initBoard(board, width, height);//init the board
+	*generations = getNumOfGenerations();//get generations
 }
 
 /***************************************************************************************
@@ -154,33 +153,37 @@ void playGame(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int height
 	int state,flag;
 	int x, y, i;
 	printf("\nWelcome to the game of life!\nThis is the initial board:\n");
+	//from here
 	processBoard(board, width, height);
 	printBoard(board, width, height);
 	state = endState(board,width,height);
 	gameEnd(state, 0, &flag);
 	if (flag)
 		return;
+	//to here is the code block that checks who won the game
+	//the 0 in the center means that there are still turns left to play
 	for (i = 0; i < generations; i++)
-	{
+	{//running over the number of henerations
 		if (i % 2 == 0)
-		{
+		{//the player goes first
 			getTurn(board, width, height, &x, &y);
 			board[x][y] = PLAYER_COLOR;
 		}
 		else
-		{
+		{//the computer goes second
 			ComputerTurn(board, width, height, &x, &y);
 			board[y][x] = COMPUTER_COLOR;
 			printf("G is playing\n%d %d\n", x, y);
 		}
-		processBoard(board, width, height);
-		printBoard(board, width, height);
-		state = endState(board, width, height);
-		gameEnd(state, 0, &flag);
-		if (flag)
-			return;
+		//after every turn
+		processBoard(board, width, height);//update the board
+		printBoard(board, width, height);//print it
+		state = endState(board, width, height);//check the end state
+		gameEnd(state, 0, &flag);//check if someone won
+		if (flag)//if someone had won
+			return;//stop the game
 	}
-	gameEnd(state, 1, &flag);
+	gameEnd(state, 1, &flag);//there are no more generations check with 1 this time
 }
 
 /***************************************************************************************
@@ -221,25 +224,27 @@ char processCell(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int hei
 			ny = (height + y + j) % height;//new y
 			/*
 			new_x and new_y will correct themself if they go out of bounds
+			(width + x + i) % width will always be >=0 and <width
+			(height + y + j) % height will always be >=0 and <height  
 			*/
 			if (j == 0 && i == 0)
-				alive = board[ny][nx] != DEAD_COLOR;
+				alive = (board[ny][nx] != DEAD_COLOR);//check if the cell is alive
 			else
 			{
 				if (board[ny][nx] == PLAYER_COLOR)
-					player++;
+					player++;//sum the player colored cells
 				else if (board[ny][nx] == COMPUTER_COLOR)
-					computer++;
+					computer++;//sum the computer colored cells
 			}
 		}
 	}//these loops sum over the grid of squares around them
 	sum = player + computer;
 	if (alive)
-	{
+	{//if hes alive
 		if (sum == 3 || sum == 2)
-			return board[y][x];
+			return board[y][x];//if there are enougth people around stay alive
 		else
-			return DEAD_COLOR;
+			return DEAD_COLOR;//die of over/under population
 	}//if the cell is alive and isnt overpopulated he survives
 	else
 	{//if hes dead
@@ -263,14 +268,14 @@ void processBoard(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int he
 	int i, j;
 	char temp[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE];
 	for ( i = 0; i < height; i++)
-	{
+	{//run over the whole board
 		for ( j = 0; j < width; j++)
 		{
 			temp[i][j] = processCell(board, width, height, j, i);//write to a new board the cells of its location after 1 generation
 		}
 	}
 	for (i = 0; i < height; i++)
-	{
+	{//run over the whole board again
 		for (j = 0; j < width; j++)
 		{
 			board[i][j] = temp[i][j];//copy over the changed board
@@ -349,12 +354,12 @@ void getCell(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int height,
 Function name: getTurn
 Input: the board, the height and the width, and pointers to the next move location (x,y).
 Output: None (puts valid values into x and y).
-The function operation: get the next move from the computer.
+The function operation: get the next move from the player.
 ****************************************************************************************/
 void getTurn(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int height,int* x,int* y)
 {
 	printf("R is playing\nx y:\n");
-	scanf("%d %d", y, x);
+	scanf("%d %d", y, x);//we know the player enters valid cells
 	return;
 }
 
@@ -464,41 +469,41 @@ The function operation: handels deciding who wins or loses.
 void gameEnd(int state, int isthistheend, int* flag)
 {
 	if (isthistheend)
-	{
+	{//if the game is over
 		if (state == 3 || state == 1)
-		{
+		{//either player has more cells then computer or computer is totaly dead
 			*flag = 1;
 			printf("Game over! %c is the winner :)\n", PLAYER_COLOR);
 			return;
 		}
 		else if (state == 4 || state == 2)
-		{
+		{//either computer has more cells then player or player is totaly dead
 			*flag = 1;
 			printf("Game over! %c is the winner :(\n", COMPUTER_COLOR);
 			return;
 		}
 	}
 	else
-	{
+	{//the game isnt over
 		if (state == 0)
-		{
+		{//every body is dead
 			*flag = 1;
 			printf("Game over! There is no winner :|\n");
 			return;
 		}
 		else if (state == 1)
-		{
+		{//computer is totaly dead
 			*flag = 1;
 			printf("Game over! %c is the winner :)\n", PLAYER_COLOR);
 			return;
 		}
 		else if (state == 2)
-		{
+		{//player is totaly dead
 			*flag = 1;
 			printf("Game over! %c is the winner :(\n", COMPUTER_COLOR);
 			return;
 		}
 	}
-	*flag = 0;
+	*flag = 0;//no win condition is met
 	return;
 }
