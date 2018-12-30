@@ -6,12 +6,11 @@
 #define MIN_WIDTH_SIZE 10
 #define PLAYER_COLOR 'R'
 #define COMPUTER_COLOR 'G'
-/*
+/*******************
 Ilay Tzuberi
-
-'a'=97 'A'=65
-'z'=122 'Z'=90
-*/
+211873286
+83-120-05
+********************/
 
 void initGame(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int* width, int* height, long int* generations);
 void initBoard(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int* width, int* height);
@@ -21,8 +20,9 @@ void processBoard(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int he
 void getDimentions(int* width, int* height);
 void printBoard(const char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int height);
 long int getNumOfGenerations();
-int endstate(const char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int height);
-char processcell(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int height, int x, int y);
+int endState(const char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int height);
+char processCell(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int height, int x, int y);
+void getCell(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int height,int allowoverride);
 
 int main()
 {
@@ -87,17 +87,7 @@ void initLivingCells(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int
 	} while (amount<0 || amount>width*height);
 	for (i = 0; i < amount; i++)
 	{
-		do
-		{
-			valid = 0;
-			printf("Enter x y and color (R/G):\n");
-			scanf("%d %d %c", &x, &y, &c);
-			if (c == (PLAYER_COLOR + 32) || c == PLAYER_COLOR)
-				valid = 1, c = 'R';
-			else if (c == (COMPUTER_COLOR + 32) || c == COMPUTER_COLOR)
-				valid = 1, c = 'G';
-		} while (x >= width || x < 0 || y >= height || y < 0 || valid == 0);
-		board[y][x] = c;
+		getCell(board, width, height, 0);
 	}
 
 }
@@ -129,7 +119,7 @@ void printBoard(const char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, in
 	}
 }
 
-char processcell(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int height, int x, int y)
+char processCell(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int height, int x, int y)
 {
 	int nx, ny, player = 0, computer = 0, alive = 0, sum;
 	for (int i = -1; i <= 1; i++)
@@ -171,13 +161,13 @@ void processBoard(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int he
 	{
 		for ( j = 0; j < width; j++)
 		{
-			temp[i][j] = processcell(board, width, height, j, i);
+			temp[i][j] = processCell(board, width, height, j, i);
 		}
 	}
 	board = temp;
 }
 
-int endstate(const char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int height)
+int endState(const char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int height)
 {///returns 0 for extinction, 1 for player win, 2 for computer win
 	int player = 0, computer = 0;
 	for (int i = 0; i < height; i++)
@@ -191,4 +181,32 @@ int endstate(const char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int h
 		}
 	}
 	return (player == 0 && computer == 0) ? 0 : (player > computer ? 1 : (player < computer ? 2 : 0));
+}
+
+void getCell(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int height, int allowoverride)
+{	/*allowoverride = 0 => no writing over existing cells
+	  allowoverride = 1 => write over existing cells
+	*/
+	int x, y;//x,y for input
+	char c;//char for input
+	int valid, inboard, isalive = 0;//boolean variables for logic
+	do
+	{
+		valid = 0, isalive = 0;
+		printf("Enter x y and color (R/G):\n");
+		scanf("%d %d %c", &x, &y, &c);
+		if (c == (PLAYER_COLOR + 32) || c == PLAYER_COLOR)//calculating chars using ascii
+			valid = 1, c = 'R';
+		else if (c == (COMPUTER_COLOR + 32) || c == COMPUTER_COLOR)//calculating chars using ascii
+			valid = 1, c = 'G';
+		inboard = !(x > width || x < 0 || y > height || y < 0);//checking if the location he chose is not out of bounds
+		if (inboard)
+			isalive = (board[y][x] != '-');
+	} while (valid == 0 || !inboard || !(!isalive||allowoverride));//will continue to ask for units untill getting a valid input
+	/*
+	when (!isalive||allowoverride) is true we can write to the board
+	when inboard we know the loaction the user chose is on the board
+	valid is to check if he inputed a valid cell
+	*/
+	board[y][x] = c;
 }
