@@ -26,9 +26,9 @@ void initLivingCells(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int
 void playGame(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int height, long int generations);
 void processBoard(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int height);
 void getDimentions(int* width, int* height);
-void printBoard(const char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int height);
+void printBoard(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int height);
 long int getNumOfGenerations();
-int endState(const char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int height);
+int endState(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int height);
 char processCell(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int height, int x, int y);
 void getCell(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int height,int allowoverride);
 void getTurn(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int height, int* x, int* y);
@@ -46,7 +46,6 @@ int main()
 	long int generations;
 	initGame(board, &width, &height, &generations);
 	playGame(board, width, height, generations);
-	system("pause");
 	return 0;
 }
 
@@ -82,9 +81,9 @@ long int getNumOfGenerations()
 	long int generations;
 	do
 	{
-		printf("Enter number of generations(>0):\n");
+		printf("Enter number of generations(>=0):\n");
 		scanf("%ld", &generations);
-	} while (generations<=0);//makes sure generation number is positive
+	} while (generations<0);//makes sure generation number is positive
 	return generations;
 }
 
@@ -128,7 +127,7 @@ void initLivingCells(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int
 	{
 		getCell(board, width, height, 0);
 	}//get that amount
-
+	printf("\n");
 }
 
 /***************************************************************************************
@@ -144,9 +143,16 @@ void initGame(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int* width, int* heig
 	*generations = getNumOfGenerations();
 }
 
+/***************************************************************************************
+Function name: playGame
+Input: the board, the height, the width and the number of generations.
+Output: none this is the game loop
+The function operation: runs the game following the instructions
+****************************************************************************************/
 void playGame(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int height, long int generations)
 {
 	int state,flag;
+	int x, y, i;
 	printf("\nWelcome to the game of life!\nThis is the initial board:\n");
 	processBoard(board, width, height);
 	printBoard(board, width, height);
@@ -154,7 +160,27 @@ void playGame(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int height
 	gameEnd(state, 0, &flag);
 	if (flag)
 		return;
-
+	for (i = 0; i < generations; i++)
+	{
+		if (i % 2 == 0)
+		{
+			getTurn(board, width, height, &x, &y);
+			board[x][y] = PLAYER_COLOR;
+		}
+		else
+		{
+			ComputerTurn(board, width, height, &x, &y);
+			board[y][x] = COMPUTER_COLOR;
+			printf("G is playing\n%d %d\n", x, y);
+		}
+		processBoard(board, width, height);
+		printBoard(board, width, height);
+		state = endState(board, width, height);
+		gameEnd(state, 0, &flag);
+		if (flag)
+			return;
+	}
+	gameEnd(state, 1, &flag);
 }
 
 /***************************************************************************************
@@ -163,7 +189,7 @@ Input: the board, the height and the width.
 Output: none
 The function operation: prints the board
 ****************************************************************************************/
-void printBoard(const char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int height)
+void printBoard(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int height)
 {///prints the board
 	int i,j;
 	for (i = 0; i < height; i++)//loop over all the board
@@ -174,6 +200,7 @@ void printBoard(const char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, in
 		}
 		printf("\n");//after every row go down a line
 	}
+	printf("\n");
 }
 
 /***************************************************************************************
@@ -185,9 +212,10 @@ The function operation: the function rus over the 3x3 grid surrounding the cell 
 char processCell(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int height, int x, int y)
 {
 	int nx, ny, player = 0, computer = 0, alive = 0, sum;
-	for (int i = -1; i <= 1; i++)
+	int i, j;
+	for (i = -1; i <= 1; i++)
 	{
-		for (int j = -1; j <= 1; j++)
+		for (j = -1; j <= 1; j++)
 		{
 			nx = (width + x + i) % width;//new x
 			ny = (height + y + j) % height;//new y
@@ -256,12 +284,13 @@ Input: the board, the height and the width.
 Output: an int based on scenarios documented in the function itself.
 The function operation: calculate who has won.
 ****************************************************************************************/
-int endState(const char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int height)
+int endState(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int height)
 {
 	int player = 0, computer = 0;
-	for (int i = 0; i < height; i++)
+	int i, j;
+	for (i = 0; i < height; i++)
 	{
-		for (int j = 0; j < width; j++)//nested loop to sum the amount of living cells of each color
+		for (j = 0; j < width; j++)//nested loop to sum the amount of living cells of each color
 		{
 			if (board[i][j] == PLAYER_COLOR)
 				player++;
@@ -324,16 +353,8 @@ The function operation: get the next move from the computer.
 ****************************************************************************************/
 void getTurn(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int height,int* x,int* y)
 {
-	int x_in, y_in;//x_in,y_in for input
-	int inboard;
-	do
-	{
-		printf("Enter x y and color (R/G):\n");
-		scanf("%d %d", &x, &y);
-		inboard = !(x > width || x < 0 || y > height || y < 0);//checking if the location he chose is not out of bounds
-	} while (!inboard);//will continue to ask for units untill getting a valid input
-	*x = x_in;
-	*y = y_in;
+	printf("R is playing\nx y:\n");
+	scanf("%d %d", y, x);
 	return;
 }
 
@@ -349,7 +370,6 @@ void ComputerTurn(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int he
 	int localX[2] = { 0,0 }, localY[2] = { 0,0 };
 	int flag[2] = { 0,0 };
 	int playerNeighbours = 0, computerNeighbours = 0;
-
 	//computer scans the board from the top left to the bottom right
 	for (i = 0; i < height; i++)
 	{
@@ -407,10 +427,11 @@ The function operation: scan over all neighboars and write to the pointers the a
 ****************************************************************************************/
 void CountNeighbours(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int height, int x, int y, int* neighboar_player, int* neighboar_computer)
 {
-	int nx, ny, player = 0, computer = 0, alive = 0, sum;
-	for (int i = -1; i <= 1; i++)
+	int nx, ny, player = 0, computer = 0, alive = 0;
+	int i, j;
+	for (i = -1; i <= 1; i++)
 	{
-		for (int j = -1; j <= 1; j++)
+		for (j = -1; j <= 1; j++)
 		{
 			nx = (width + x + i) % width;//new x
 			ny = (height + y + j) % height;//new y
@@ -462,7 +483,7 @@ void gameEnd(int state, int isthistheend, int* flag)
 		if (state == 0)
 		{
 			*flag = 1;
-			printf("Game over! There is no winner :|\n", COMPUTER_COLOR);
+			printf("Game over! There is no winner :|\n");
 			return;
 		}
 		else if (state == 1)
@@ -481,10 +502,3 @@ void gameEnd(int state, int isthistheend, int* flag)
 	*flag = 0;
 	return;
 }
-
-/***************************************************************************************
-Function name:
-Input: the board, the height and the width.
-Output:
-The function operation:
-****************************************************************************************/
