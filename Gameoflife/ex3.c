@@ -176,6 +176,13 @@ void playGame(char board[MAX_HEIGHT_SIZE][MAX_WIDTH_SIZE], int width, int height
 			printf("G is playing\n%d %d\n", x, y);
 		}
 		//after every turn
+		state = endState(board, width, height);//calculate the state of the game
+		if (state == 0 || state == 1 || state == 2)//if someone is totaly dead
+		{
+			printBoard(board, width, height);//print the board
+			gameEnd(state, 0, &flag);//print the victory mesegge
+			return;//stop the game
+		}
 		processBoard(board, width, height);//update the board
 		printBoard(board, width, height);//print it
 		state = endState(board, width, height);//check the end state
