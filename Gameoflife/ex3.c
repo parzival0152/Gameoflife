@@ -45,6 +45,7 @@ int main()
 	long int generations;
 	initGame(board, &width, &height, &generations);
 	playGame(board, width, height, generations);
+	system("pause"); 
 	return 0;
 }
 
